@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tetris</title>
+        <meta name="google" content="notranslate">
+        <meta name="robots" content="noindex">
+        <link rel="icon" href="tetris_logo.png">
+        <script src="p5.min.js"></script>
+        <style>
+            body {
+                text-align: center;
+                align-content: center;
+                overflow: hidden;
+            }
+            html, body {
+                font-family: Arial, Helvetica, sans-serif;
+                height: min(100vh, 100%);
+                margin: 0;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+            :root {
+                --blue1: #59f;
+            }
+            main {
+                height: 880px;
+            }
+            [type=checkbox] {
+                display: none;
+            }
+            label {
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+            }
+            body > div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: absolute;
+                pointer-events: none;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                & * {
+                    pointer-events: initial;
+                }
+            }
+            .setting, #title {
+                width: 379px;
+                height: 779px;
+                padding: 10px;
+                text-align: left;
+                color: #fff;
+                background: #282828;
+                border: #696969 solid 1px;
+                z-index: 1;
+            }
+            button {
+                margin-inline: 5px;
+                margin-block: 1px;
+                padding: 1px 10px;
+                font-size: 13px;
+                height: 1.8em;
+                color: #fff;
+                font-weight: normal;
+                background-color: var(--blue1);
+                border: 1px #fff solid;
+                border: 0;
+                border-radius: .9em;
+                cursor: pointer;
+                &:active {
+                    filter: contrast(.7);
+                }
+            }
+            .setting label {
+                outline: none;
+                line-height: 1lh;
+                filter: contrast(.5);
+                color: #fff;
+                &:has([edited]) {
+                    filter: contrast(1);
+                }
+                & [id] {
+                    font-size: inherit;
+                    padding: 0;
+                    border: 0;
+                    width: 4em;
+                    border-radius: .2em;
+                    background-color: #fff5;
+                    color: #fff;
+                }
+                & :has([id]) {
+                    width: 3em;
+                    margin-right: .5em;
+                    border-radius: .5lh;
+                    background-color: #fff3;
+                    &::before {
+                        content: '';
+                        transition: .1s;
+                        display: block;
+                        width: .75lh;
+                        height: .75lh;
+                        border-radius: .5lh;
+                        margin: 2.3125px;
+                        background: #282828;
+                    }
+                    &:has(:checked) {
+                        background-color: var(--blue1);
+                        &::before {
+                            background-color: #fff;
+                            margin-left: 31.8125px;
+                        }
+                    }
+                }
+                &:focus [id] {
+                    background-color: #fff7;
+                }
+            }
+            .popup {
+                width: 229px;
+                height: 179px;
+                padding: 10px;
+                text-align: left;
+                color: #fff;
+                background: #282828;
+                border: #696969 solid 1px;
+                overflow: scroll;
+                z-index: 1;
+            }
+            #title h1 {
+                display: inline-block;
+                color: transparent;
+                background-clip: text;
+                font-size: 64px;
+                margin-block: .33em;
+                -webkit-text-stroke: 1px #fff;
+                background-image: repeating-linear-gradient(to right top in hsl, #f00, #0f0, #00f, #f00 2em);
+            }
+            div + p button {
+                scale: 3;
+                margin: 20px 77px;
+            }
+            #playing {
+                height: 880px;
+                width: 880px;
+            }
+        </style>
+        <script src="tetris.js"></script>
+    </head>
+    <body oncontextmenu="return false;">
+        <div>
+            <div style="display: none;" id="title">
+                <h1>テトリス</h1>
+                <div style="background-image:url(tetris_logo.png);height:300px;width:300px;"></div>
+                <p><button>スタート</button></p>
+                <p><button>ゲーム設定</button><button>操作設定</button></p>
+            </div>
+            <div style="display: none;" id="playing"></div>
+            <div style="display: none;" id="game_setting" class="setting">
+                <h1>ゲーム設定</h1>
+                <div>
+                    <p><label tabindex="1"><span>スタート時のレベル:</span><input id="level_set" type="number" step="1" min="1" max="115" required></label></p>
+                    <p><label tabindex="1"><span>ゴーストピース:</span><span><input id="ghost_set" type="checkbox" checked></span></label></p>
+                    <p><label tabindex="1"><span>NEXTの表示数:</span><input id="NEXT_set" type="number" step="1" min="0" max="6" required></input></label></p>
+                    <p><label tabindex="1"><span>HOLD:</span><span><input id="HOLD_set" type="checkbox" checked></span></label></p>
+                    <p><label tabindex="1"><span>ミノの出現遅延時間(F/60FPS):</span><input id="Entry_Delay_set" type="number" step="1" min="1" required></label></p>
+                    <p><label tabindex="1"><span>DAS(F/60FPS):</span><input id="DAS_set" type="number" step="1" min="0" required></label></p>
+                    <p><label tabindex="1"><span>ARR(F/60FPS):</span><input id="ARR_set" type="number" step="1" min="0" required></label></p>
+                    <p><label tabindex="1"><span>エンドレス:</span><span><input id="endless_set" type="checkbox"></span></label></p>
+                </div>
+                <div><button>リセット</button><button>適用</button><button>戻る</button></div>
+            </div>
+            <div style="display: none;" id="operation_setting" class="setting">
+                <h1>操作設定</h1>
+                <div>
+                    <p><label tabindex="1"><span>右移動:</span><span id="move_right"> </span></label></p>
+                    <p><label tabindex="1"><span>左移動:</span><span id="move_left"> </span></label></p>
+                    <p><label tabindex="1"><span>右回転:</span><span id="rotate_right"> </span></label></p>
+                    <p><label tabindex="1"><span>左回転:</span><span id="rotate_left"> </span></label></p>
+                    <p><label tabindex="1"><span>ソフトドロップ:</span><span id="soft_drop"> </span></label></p>
+                    <p><label tabindex="1"><span>ハードドロップ:</span><span id="hard_drop"> </span></label></p>
+                    <p><label tabindex="1"><span>ホールド:</span><span id="hold"> </span></label></p>
+                </div>
+                <div><button>リセット</button><button>適用</button><button>戻る</button></div>
+            </div>
+            <div style="display: none;" id="game_clear" class="popup">
+                <h1>ゲームクリア</h1>
+                <button>トップに戻る</button>
+            </div>
+            <div style="display: none;" id="game_over" class="popup">
+                <h1>ゲームオーバー</h1>
+                <button>トップに戻る</button>
+            </div>
+        </div>
+    </body>
+</html>
